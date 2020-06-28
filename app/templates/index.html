@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div>
+	<h1>Upload file</h1>
+	<form method=POST enctype="multipart/form-data" action="">
+		<p>
+			{{ form.hidden_tag() }}
+			{{ form.upload.label }}<br>
+			{{ form.upload() }}<br>
+			{% for error in form.upload.errors %}
+			<span style="color: red;">[{{ error }}]</span>
+			{% endfor %}
+		</p>
+		<p> {{form.submit }} </p>
+	</form>
+</div>
+{% endblock %}
