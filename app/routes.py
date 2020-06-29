@@ -1,10 +1,12 @@
-import os
-from flask import render_template, flash, redirect, url_for, request
+from pathlib import Path
+
+from flask import render_template, flash, redirect, url_for, request, send_from_directory
 from flask_login import current_user, login_user, logout_user, login_required
+
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
 
-from app import app, db
+from app import app, db, all_files
 from app.forms import LoginForm, RegistrationForm, UploadForm
 from app.models import User
 
@@ -14,14 +16,27 @@ from app.models import User
 def index():
     form = UploadForm()
     if form.validate_on_submit():
-        f = form.upload.data
-        filename = secure_filename(f.filename)
-        f.save(os.path.join(
-            app.instance_path, 'files', filename
-        ))
-        return redirect(url_for('index')
+        files = request.files.getlist('files')
+        for file in files:
+            filename = secure_filename(file.filename)
+            all_files.save(file, folder=current_user.username, name=filename)
 
-    return render_template('index.html', title='Upload files', form=form)
+        return redirect(url_for('index'))
+
+    user_dir = Path(app.config['UPLOADED_FILES_DEST']) / current_user.username
+    user_files = []
+    for entry in user_dir.iterdir():
+       user_files.append(entry.name)
+
+    return render_template('index.html',
+                           title='Upload files', form=form, files=user_files)
+
+
+@app.route('/download/<filename>')
+@login_required
+def download(filename):
+    user_dir = Path(app.config['UPLOADED_FILES_DEST'] / current_user.username)
+    return send_from_directory(user_dir, filename, as_attachment=True)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -46,24 +61,27 @@ def login():
     return render_template('login.html', title='Sign in', form=form)
 
 
-@app.route('/logout')
-def logout():
-    logout_user()
-    return redirect(url_for('index'))
-
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-    
+
     form = RegistrationForm()
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data)
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
+        user_dir = Path(app.config['UPLOADED_FILES_DEST']) / user.username
+        user_dir.mkdir(parents=True, exist_ok=True)
+
         flash('Congratulations, you now have an account on this shitty site!')
         return redirect(url_for('login'))
 
     return render_template('register.html', title='Register', form=form)
+
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))

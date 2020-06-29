@@ -1,0 +1,7 @@
+{
+	"python.venvPath": "~/Projects/SnakeDrive/env/",
+	"python.linting.pylintArgs": [
+            "--load-plugins",
+            "pylint-flask"
+        ]
+}

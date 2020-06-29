@@ -6,13 +6,24 @@
 	<form method=POST enctype="multipart/form-data" action="">
 		<p>
 			{{ form.hidden_tag() }}
-			{{ form.upload.label }}<br>
-			{{ form.upload() }}<br>
-			{% for error in form.upload.errors %}
+			{{ form.files.label }}<br>
+			{{ form.files() }}<br>
+			{% for error in form.files.errors %}
 			<span style="color: red;">[{{ error }}]</span>
 			{% endfor %}
 		</p>
 		<p> {{form.submit }} </p>
 	</form>
+</div>
+<hr>
+<div>
+	<h1>Your files</h1>
+	<ul>
+		{% for file in files %}
+		<li>
+			<a href="{{ url_for('download', filename=file) }}">{{ file }}</a>
+		</li>
+		{% endfor %}
+	</ul>
 </div>
 {% endblock %}
