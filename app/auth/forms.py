@@ -1,10 +1,8 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileRequired, FileAllowed
 
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 
-from app import all_files
 from app.models import User
 
 
@@ -34,12 +32,3 @@ class RegistrationForm(FlaskForm):
         if user is not None:
             raise ValidationError(
                 'Account for {} already exists!'.format(email.data))
-
-
-class UploadForm(FlaskForm):
-    files = FileField('Files', render_kw={'multiple': True},
-                      validators=[
-        FileRequired(),
-        FileAllowed(all_files, 'No scripts nor executables!')
-    ])
-    submit = SubmitField('Upload')
