@@ -1,5 +1,7 @@
 import os
+import jwt
 import base64
+from time import time
 from pathlib import Path
 from datetime import datetime, timedelta
 
@@ -11,12 +13,13 @@ from app import db
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), index=True, unique=True)
-    username = db.Column(db.String(64), index=True, unique=True)
-    password_hash = db.Column(db.String(128))
+    email = db.Column(db.String(120), index=True, unique=True, nullable=False)
+    username = db.Column(db.String(64), index=True, unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
     token = db.Column(db.String(32), index=True, unique=True)
     token_expiration = db.Column(db.DateTime)
-    
+    verified = db.Column(db.Boolean, default=False)
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
@@ -42,21 +45,38 @@ class User(db.Model):
             return None
         return user
 
+    def get_email_verification_token(self, expires_in=3600):
+        return jwt.encode(
+            {'verify_email': self.id, 'exp': time() + expires_in},
+            current_app.config['SECRET_KEY'],
+            algorithm='HS256'
+        ).decode('utf-8')
+
+    @staticmethod
+    def check_email_verification_token(token):
+        try:
+            id = jwt.decode(token, current_app.config['SECRET_KEY'],
+                            algorithms=['HS256'])['verify_email']
+        except:
+            return
+        return User.query.get(id)
+
     def get_dir(self):
         dir = Path(current_app.config['UPLOADED_FILES_DEST']) / str(self.id)
         dir.mkdir(parents=True, exist_ok=True)
-        return dir 
+        return dir
 
     def to_dict(self):
         data = {
             'id': self.id,
             'username': self.username,
             'email': self.email,
+            'verified': self.verified,
         }
         return data
 
     def from_dict(self, data, new_user=False):
-        for field in ['username', 'email']:
+        for field in ['username', 'email', 'verified']:
             if field in data:
                 setattr(self, field, data[field])
         if new_user and 'password' in data:
@@ -65,12 +85,13 @@ class User(db.Model):
 
 class File(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120))
-    extension = db.Column(db.String(10))
-    fullname = db.Column(db.String(130))
-    size = db.Column(db.String(120))
-    path = db.Column(db.String(120))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    name = db.Column(db.String(120), index=True, nullable=False)
+    extension = db.Column(db.String(10), nullable=False)
+    fullname = db.Column(db.String(130), index=True, nullable=False)
+    size = db.Column(db.String(120), nullable=False)
+    path = db.Column(db.String(120), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey(
+        'user.id'), index=True, nullable=False)
 
     def to_dict(self, path=False):
         data = {

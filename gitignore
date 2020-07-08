@@ -1,0 +1,8 @@
+__pycache__/
+env/
+user_uploads/
+snakedrive.db
+.vim/
+.env
+.flaskenv
+.git

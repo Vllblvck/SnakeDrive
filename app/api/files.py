@@ -12,13 +12,15 @@ from app.api.errors import bad_request, error_response
 @bp.route('/files', methods=['POST'])
 @token_auth.login_required
 def upload_files():
+    user = token_auth.current_user()
+    if not user.verified:
+        return error_response(403, 'Email not confirmed')
+
     if 'files' not in request.files:
         return bad_request('No files to upload')
 
     files = request.files.getlist('files')
-    user = token_auth.current_user()
     user_dir = user.get_dir()
-
     uploaded = []
     errors = []
     for file in files:
@@ -36,7 +38,7 @@ def upload_files():
             'extension': file_path.suffix,
             'fullname': filename,
             'size': file_path.stat().st_size,
-            'path': file_path,
+            'path': str(file_path),
             'user_id': user.id
         }
         db_data = File()
@@ -57,48 +59,42 @@ def upload_files():
 @bp.route('/files', methods=['GET'])
 @token_auth.login_required
 def list_files():
-    user_id = token_auth.current_user().id
-    files = File.query.filter_by(user_id=user_id).all()
+    user = token_auth.current_user()
+    if not user.verified:
+        return error_response(403, 'Email not confirmed')
+
+    files = File.query.filter_by(user_id=user.id).all()
     response = {'files': []}
     if files:
         files_dict = [file.to_dict() for file in files]
         response['files'] = files_dict
-    return jsonify(response)
+    return response
 
 
 @bp.route('/files/<filename>', methods=['GET'])
 @token_auth.login_required
 def download_file(filename):
     user = token_auth.current_user()
+    if not user.verified:
+        return error_response(403, 'Email not confirmed')
+
     file = File.query.filter_by(fullname=filename, user_id=user.id).first()
     if not file:
         return error_response(404, 'File {} does not exist'.format(filename))
     return send_from_directory(user.get_dir(), file.fullname, as_attachment=True)
 
 
-@bp.route('files/<filename>', methods=['DELETE'])
-@token_auth.login_required
-def delete_file(filename):
-    user_id = token_auth.current_user().id
-    file = File.query.filter_by(fullname=filename, user_id=user_id).first()
-    if not file:
-        return error_response(404, 'File {} does not exist'.format(filename))
-
-    filepath = Path(file.path)
-    filepath.unlink()
-    db.session.delete(file)
-    db.session.commit()
-    return '', 204
-
-
 @bp.route('files/<filename>', methods=['PUT'])
 @token_auth.login_required
 def edit_file(filename):
+    user = token_auth.current_user()
+    if not user.verified:
+        return error_response(403, 'Email not confirmed')
+
     data = request.get_json() or {}
     if 'name' not in data:
         return bad_request('Must include name field')
 
-    user = token_auth.current_user()
     file = File.query.filter_by(fullname=filename, user_id=user.id).first()
     if not file:
         return error_response(404, 'File {} doest not exist'.format(filename))
@@ -109,7 +105,7 @@ def edit_file(filename):
     file_data = {
         'name': name,
         'fullname': fullname,
-        'path': path
+        'path': str(path)
     }
 
     old_path = Path(file.path)
@@ -120,3 +116,21 @@ def edit_file(filename):
     response = jsonify(file.to_dict())
     response.status_code = 201
     return response
+
+
+@bp.route('files/<filename>', methods=['DELETE'])
+@token_auth.login_required
+def delete_file(filename):
+    user = token_auth.current_user()
+    if not user.verified:
+        return error_response(403, 'Email not confirmed')
+
+    file = File.query.filter_by(fullname=filename, user_id=user.id).first()
+    if not file:
+        return error_response(404, 'File {} does not exist'.format(filename))
+
+    filepath = Path(file.path)
+    filepath.unlink()
+    db.session.delete(file)
+    db.session.commit()
+    return '', 204

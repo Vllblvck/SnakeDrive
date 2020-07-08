@@ -1,2 +1,3 @@
 # SnakeDrive
-Flask web application for cloud storage
+Flask REST API for cloud storage  
+Created for learning purposes
