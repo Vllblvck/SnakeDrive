@@ -44,22 +44,25 @@ def create_user():
 def edit_user():
     user = token_auth.current_user()
     data = request.get_json() or {}
-    if 'username' in data and data['username'] == user.username or \
-            not valid_username(data['username']):
-        return bad_request('Data must contain valid username')
+    if 'username' not in data and 'email' not in data and 'password' not in data:
+        return bad_request('Must include one of: username, email, password')
     
-    if 'email' in data and data['email'] == user.email or \
-            not valid_email(data['email']):
-        return bad_request('Data must containt valid email')
-    
-    user.from_dict(data)
+    if 'username' in data:
+        if data['username'] == user.username or not valid_username(data['username']):
+            return bad_request('Data must contain valid username')
+
+    if 'email' in data:
+        if data['email'] == user.email or not valid_email(data['email']):
+            return bad_request('Data must containt valid email')
+
+    user.from_dict(data, new_user=True)
     if 'email' in data:
         user.verified = False
         send_verification_email(user)
     db.session.commit()
     return user.to_dict()
 
-#TODO email confirmation ?
+
 @bp.route('/users', methods=['DELETE'])
 @token_auth.login_required
 def delete_user():
@@ -67,4 +70,14 @@ def delete_user():
     delete_folder(user.get_dir())
     db.session.delete(user)
     db.session.commit()
+    return '', 204
+
+
+@bp.route('/users/resend_verification_email', methods=['POST'])
+@token_auth.login_required
+def resend_verification_email():
+    user = token_auth.current_user()
+    if user.verified:
+        return bad_request('User already verified')
+    send_verification_email(user)
     return '', 204

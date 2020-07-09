@@ -13,7 +13,7 @@ def delete_folder(path):
 
 
 def valid_username(username):
-    if len(username) >= 1:
+    if len(username) >= 1 and len(username) <= 64:
         forbidden_chars = string.punctuation
         return not any(char in forbidden_chars for char in username)
     return False
@@ -21,6 +21,6 @@ def valid_username(username):
 
 def valid_email(email):
     regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
-    if re.search(regex, email):
+    if re.search(regex, email) and len(email) <= 120:
         return True
     return False

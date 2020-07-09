@@ -1,5 +1,4 @@
 import os
-import jwt
 import base64
 from time import time
 from pathlib import Path
@@ -7,6 +6,8 @@ from datetime import datetime, timedelta
 
 from flask import url_for, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
+from jwt import encode, decode
+from jwt.exceptions import InvalidTokenError
 
 from app import db
 
@@ -46,7 +47,7 @@ class User(db.Model):
         return user
 
     def get_email_verification_token(self, expires_in=3600):
-        return jwt.encode(
+        return encode(
             {'verify_email': self.id, 'exp': time() + expires_in},
             current_app.config['SECRET_KEY'],
             algorithm='HS256'
@@ -55,10 +56,14 @@ class User(db.Model):
     @staticmethod
     def check_email_verification_token(token):
         try:
-            id = jwt.decode(token, current_app.config['SECRET_KEY'],
-                            algorithms=['HS256'])['verify_email']
-        except:
-            return
+            id = decode(
+                token,
+                current_app.config['SECRET_KEY'],
+                algorithms=['HS256']
+            )['verify_email']
+        except InvalidTokenError:
+            return None
+
         return User.query.get(id)
 
     def get_dir(self):

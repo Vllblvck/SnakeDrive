@@ -30,7 +30,7 @@ def create_app(config_class=Config):
     app.register_blueprint(errors_bp, url_prefix='/error')
 
     from app.email import bp as email_bp
-    app.register_blueprint(email_bp)
+    app.register_blueprint(email_bp, url_prefix='/email')
 
     return app
 

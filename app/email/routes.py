@@ -10,7 +10,7 @@ from app.models import User
 def verify_email(token):
     user = User.check_email_verification_token(token)
     if not user:
-        return render_template('expired_email_token.html')
+        return render_template('email/invalid_verification_token.html')
     user.verified = True
     db.session.commit()
-    return render_template('success_verification.html')
+    return render_template('email/success_verification.html')
