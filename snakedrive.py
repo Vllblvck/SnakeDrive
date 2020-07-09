@@ -20,7 +20,7 @@ def make_shell_context():
 @click.argument('email')
 @click.argument('username')
 @click.argument('password')
-def create_admin(email, username, password):
+def create_user(email, username, password):
     user_data = {
         'email': email,
         'username': username,
