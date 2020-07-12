@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from flask import url_for, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from jwt import encode, decode
-from jwt.exceptions import InvalidTokenError
+from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 
 from app import db
 
@@ -42,11 +42,11 @@ class User(db.Model):
     @staticmethod
     def check_token(token):
         user = User.query.filter_by(token=token).first()
-        if user is None or user.token_expiration < datetime.utcnow():
+        if not user or user.token_expiration < datetime.utcnow():
             return None
         return user
 
-    def get_email_verification_token(self, expires_in=3600):
+    def get_email_token(self, expires_in=3600):
         return encode(
             {'verify_email': self.id, 'exp': time() + expires_in},
             current_app.config['SECRET_KEY'],
@@ -54,16 +54,15 @@ class User(db.Model):
         ).decode('utf-8')
 
     @staticmethod
-    def check_email_verification_token(token):
+    def check_email_token(token):
         try:
             id = decode(
                 token,
                 current_app.config['SECRET_KEY'],
                 algorithms=['HS256']
             )['verify_email']
-        except InvalidTokenError:
+        except (InvalidTokenError, ExpiredSignatureError):
             return None
-
         return User.query.get(id)
 
     def get_dir(self):

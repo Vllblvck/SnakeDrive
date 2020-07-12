@@ -19,7 +19,7 @@ def get_user():
 def create_user():
     data = request.get_json() or {}
     if 'username' not in data or 'email' not in data or 'password' not in data:
-        return bad_request('Must include username, email and password fields!')
+        return bad_request('Must include username, email and password fields')
 
     if User.query.filter_by(username=data['username']).first() or \
             not valid_username(data['username']):
@@ -45,20 +45,19 @@ def edit_user():
     user = token_auth.current_user()
     data = request.get_json() or {}
     if 'username' not in data and 'email' not in data and 'password' not in data:
-        return bad_request('Must include one of: username, email, password')
-    
+        return bad_request('Must include at least one of: username, email, password')
+
     if 'username' in data:
         if data['username'] == user.username or not valid_username(data['username']):
             return bad_request('Data must contain valid username')
 
     if 'email' in data:
         if data['email'] == user.email or not valid_email(data['email']):
-            return bad_request('Data must containt valid email')
+            return bad_request('Data must contain valid email')
+        data['verified'] = False
 
     user.from_dict(data, new_user=True)
-    if 'email' in data:
-        user.verified = False
-        send_verification_email(user)
+    send_verification_email(user)
     db.session.commit()
     return user.to_dict()
 
