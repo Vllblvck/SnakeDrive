@@ -5,6 +5,7 @@ from pathlib import Path
 from datetime import datetime, timedelta
 
 from flask import url_for, current_app
+from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from jwt import encode, decode
 from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
@@ -12,10 +13,11 @@ from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 from app import db
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
+    __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), index=True, unique=True, nullable=False)
-    username = db.Column(db.String(64), index=True, unique=True, nullable=False)
+    username = db.Column(db.String(32), index=True, unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     token = db.Column(db.String(32), index=True, unique=True)
     token_expiration = db.Column(db.DateTime)
@@ -88,14 +90,15 @@ class User(db.Model):
 
 
 class File(db.Model):
+    __tablename__ = 'files'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), index=True, nullable=False)
     extension = db.Column(db.String(10), nullable=False)
     fullname = db.Column(db.String(130), index=True, nullable=False)
     size = db.Column(db.String(120), nullable=False)
     path = db.Column(db.String(120), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey(
-        'user.id'), index=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'),
+                        index=True, nullable=False)
 
     def to_dict(self, path=False):
         data = {

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>SnakeDrive</title>
+  <meta charset="UTF-8">
+  <meta name="description" content="Free and open source file storage with encryption">
+  <meta name="keywords" content="Cloud, Free , Open Source, File Storage">
+  <meta name="author" content="Mateusz Koamr">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/navigation.css') }}">
+</head>
+
+<body>
+  <div id="container">
+    <div id="navbar">
+      <ul>
+        {% if current_user.is_authenticated %}
+        <li><a href={{ url_for('main.index') }}>SnakeDrive</a></li>
+        <li><a href={{ url_for('auth.logout') }}>Log out</a></li>
+        {% else %}
+        <li><a href={{ url_for('main.welcome') }}>SnakeDrive</a></li>
+        <li><a href={{ url_for('auth.register') }}>Sign up</a></li>
+        <li><a href={{ url_for('auth.login') }}>Sign in</a></li>
+        {% endif %}
+      </ul>
+    </div>
+    <hr>
+    <div id="content">
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <ul>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </div>
+    <div id="footer">&copy; Copyright 2020</div>
+  </div>
+
+</body>
+
+</html>

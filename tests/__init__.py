@@ -1,12 +1,17 @@
 import os
 
 
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+
 class TestConfig:
     SECRET_KEY = os.urandom(20)
     SQLALCHEMY_DATABASE_URI = 'sqlite://'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    UPLOADED_FILES_DEST = os.path.join(basedir, 'test_uploads')
+    MAIL_SERVER = 'localhost'
+    APP_MAIL = 'snakedrive@snakedrive.com'
     TESTING = True
-    MAIL_SUPPRESS_SEND = False
 
 
 class TestData:
@@ -14,13 +19,13 @@ class TestData:
         'email': 'test@test.com',
         'username': 'test',
         'password': 'password',
-        'verified': True
+        'verified': False
     }
     VALID_USER_PUT = {
         'email': 'tset@tset.moc',
         'username': 'tset',
         'password': 'drowssap',
-        'verified': True
+        'verified': False
     }
     INVALID_USER = {
         'email': 'test@test.com',
@@ -30,20 +35,20 @@ class TestData:
         'email': 'invalidemail',
         'username': 'test',
         'password': 'password',
-        'verified': True
+        'verified': False
     }
     INVALID_USERNAME = {
         'email': 'test@test.com',
         'username': '!_test_!',
         'password': 'password',
-        'verified': True
+        'verified': False
     }
 
     EXPECTED_VALID_USER = {
         'id': 1,
         'email': 'test@test.com',
         'username': 'test',
-        'verified': True
+        'verified': False
     }
     EXPECTED_VALID_USER_PUT = {
         'id': 1,

@@ -1,7 +1,7 @@
 from flask import jsonify, url_for, request
 
 from app import db
-from app.email.emails import send_verification_email
+from app.email import send_verification_email
 from app.models import User
 from app.helpers import delete_folder, valid_email, valid_username
 from app.api import bp
@@ -80,3 +80,10 @@ def resend_verification_email():
         return bad_request('User already verified')
     send_verification_email(user)
     return '', 204
+
+
+@bp.route('/users/reset_password', methods=['POST'])
+def reset_password():
+    data = request.get_json() or {}
+    if 'email' not in data:
+        return bad_request('Must include email')

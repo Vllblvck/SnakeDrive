@@ -134,8 +134,37 @@ class ApiUsersCase(unittest.TestCase):
             self.assertEqual(TestData.EXPECTED_VALID_USER_PUT,
                              result.get_json())
 
+
+    #TODO check if user folder is deleted with the account
     def test_delete_user(self):
-        pass
+        user = User()
+        user.from_dict(TestData.VALID_USER, new_user=True)
+        user_id = user.id
+        token = user.get_token()
+        db.session.add(user)
+        db.session.commit()
+
+        with self.app.test_client() as client:
+            result = client.delete('/api/users')
+            self.assertEqual(401, result.status_code)
+            self.assertEqual(TestData.EXPECTED_INVALID_TOKEN,
+                             result.get_json())
+
+            result = client.delete(
+                '/api/users',
+                headers={'Authorization': 'Bearer {}'.format('invalid_token')},
+            )
+            self.assertEqual(401, result.status_code)
+            self.assertEqual(TestData.EXPECTED_INVALID_TOKEN,
+                             result.get_json())
+
+            result = client.delete(
+                '/api/users',
+                headers={'Authorization': 'Bearer {}'.format(token)},
+            )
+            self.assertEqual(204, result.status_code)
+
+        self.assertEqual(None, User.query.filter_by(id=user_id).first())
 
 
 if __name__ == '__main__':

@@ -2,7 +2,7 @@ Dear {{ user.username }},
 
 Go to below link to confirm your email address:
 
-{{ url_for('email.verify_email', token=token, _external=True) }}
+{{ url_for('auth.verify_email', token=token, _external=True) }}
 
 Sincerely,
 
