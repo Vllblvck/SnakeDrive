@@ -53,7 +53,7 @@ class ApiUsersCase(unittest.TestCase):
     def test_get_user(self):
         user = User()
         user.from_dict(TestData.VALID_USER, new_user=True)
-        token = user.get_token()
+        token = user.get_api_token()
         db.session.add(user)
         db.session.commit()
 
@@ -81,7 +81,7 @@ class ApiUsersCase(unittest.TestCase):
     def test_edit_user(self):
         user = User()
         user.from_dict(TestData.VALID_USER, new_user=True)
-        token = user.get_token()
+        token = user.get_api_token()
         db.session.add(user)
         db.session.commit()
 
@@ -140,7 +140,7 @@ class ApiUsersCase(unittest.TestCase):
         user = User()
         user.from_dict(TestData.VALID_USER, new_user=True)
         user_id = user.id
-        token = user.get_token()
+        token = user.get_api_token()
         db.session.add(user)
         db.session.commit()
 

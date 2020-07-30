@@ -23,7 +23,7 @@ def basic_auth_error(status_code):
 
 @token_auth.verify_token
 def verify_token(token):
-    return User.check_token(token) if token else None
+    return User.check_api_token(token) if token else None
 
 
 @token_auth.error_handler

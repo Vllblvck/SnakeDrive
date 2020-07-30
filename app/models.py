@@ -16,12 +16,12 @@ from app import db
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), index=True, unique=True, nullable=False)
+    email = db.Column(db.String(320), index=True, unique=True, nullable=False)
     username = db.Column(db.String(32), index=True, unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
-    token = db.Column(db.String(32), index=True, unique=True)
-    token_expiration = db.Column(db.DateTime)
     verified = db.Column(db.Boolean, default=False)
+    api_token = db.Column(db.String(32), index=True, unique=True)
+    api_token_expiration = db.Column(db.DateTime)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -29,40 +29,40 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def get_token(self, expires_in=3600):
+    def get_api_token(self, expires_in=3600):
        now = datetime.utcnow()
-       if self.token and self.token_expiration > now + timedelta(seconds=60):
-           return self.token
-       self.token = base64.b64encode(os.urandom(24)).decode('utf-8')
-       self.token_expiration = now + timedelta(seconds=expires_in)
+       if self.api_token and self.api_token_expiration > now + timedelta(seconds=60):
+           return self.api_token
+       self.api_token = base64.b64encode(os.urandom(24)).decode('utf-8')
+       self.api_token_expiration = now + timedelta(seconds=expires_in)
        db.session.add(self)
-       return self.token
+       return self.api_token
 
-    def revoke_token(self):
-        self.token_expiration = datetime.utcnow() - timedelta(seconds=1)
+    def revoke_api_token(self):
+        self.api_token_expiration = datetime.utcnow() - timedelta(seconds=1)
 
     @staticmethod
-    def check_token(token):
-        user = User.query.filter_by(token=token).first()
-        if not user or user.token_expiration < datetime.utcnow():
+    def check_api_token(token):
+        user = User.query.filter_by(api_token=token).first()
+        if not user or user.api_token_expiration < datetime.utcnow():
             return None
         return user
 
-    def get_email_token(self, expires_in=3600):
+    def get_jwt_token(self, expires_in=3600):
         return encode(
-            {'verify_email': self.id, 'exp': time() + expires_in},
+            {'jwt': self.id, 'exp': time() + expires_in},
             current_app.config['SECRET_KEY'],
             algorithm='HS256'
         ).decode('utf-8')
 
     @staticmethod
-    def check_email_token(token):
+    def check_jwt_token(token):
         try:
             id = decode(
                 token,
                 current_app.config['SECRET_KEY'],
                 algorithms=['HS256']
-            )['verify_email']
+            )['jwt']
         except (InvalidTokenError, ExpiredSignatureError):
             return None
         return User.query.get(id)

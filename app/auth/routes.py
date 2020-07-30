@@ -4,9 +4,9 @@ from werkzeug.urls import url_parse
 
 from app import db
 from app.auth import bp
-from app.auth.forms import LoginForm, RegistrationForm
+from app.auth.forms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm
 from app.models import User
-from app.email import send_verification_email
+from app.email import send_verification_email, send_password_reset_email
 
 
 @bp.route('/register', methods=['GET', 'POST'])
@@ -60,11 +60,59 @@ def logout():
     return redirect(url_for('auth.login'))
 
 
+@bp.route('/verify_email', methods=['GET', 'POST'])
+@login_required
+def verify_email_request():
+    if current_user.verified:
+        return redirect(url_for('main.index'))
+
+    send_verification_email(current_user)
+    return render_template('auth/verify_email_request.html')
+
+
 @bp.route('/verify_email/<token>', methods=['GET', 'POST'])
 def verify_email(token):
-    user = User.check_email_token(token)
+    user = User.check_jwt_token(token)
     if not user:
         return render_template('auth/invalid_token.html')
     user.verified = True
     db.session.commit()
-    return render_template('auth/success_verification.html')
+    return render_template('auth/verify_email.html')
+
+
+@bp.route('/reset_password', methods=['GET', 'POST'])
+def reset_password_request():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+
+    form = ResetPasswordRequestForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if not user:
+            flash('User with given email doesn\'t exist')
+            return redirect(url_for('auth.reset_password_request'))
+
+        send_password_reset_email(user)
+        flash('Password resent link was sent to you')
+        return redirect(url_for('auth.login'))
+
+    return render_template('auth/reset_password_request.html', form=form)
+
+
+@bp.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+
+    user = User.check_jwt_token(token)
+    if not user:
+        return render_template('auth/invalid_token.html')
+
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user.set_password(form.password.data)
+        db.session.commit()
+        flash('Your password has been reset')
+        return redirect(url_for('auth.login'))
+
+    return render_template('auth/reset_password.html', form=form)

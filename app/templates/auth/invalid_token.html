@@ -1,12 +1,5 @@
-<!DOCTYPE html>
-<html>
+{% extends "base.html" %}
 
-<head>
-    <title>Invalid token</title>
-</head>
-
-<body>
-    <h1> Your email verification token has expired </h1>
-</body>
-
-</html>
+{% block content %}
+<h1> Your token is invalid</h1>
+{% endblock %}

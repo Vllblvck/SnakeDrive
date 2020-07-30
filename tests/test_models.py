@@ -25,28 +25,28 @@ class UserModelCase(unittest.TestCase):
         self.assertFalse(user.check_password('pass'))
         self.assertTrue(user.check_password('password'))
 
-    def test_login_tokens(self):
+    def test_api_tokens(self):
         user = User()
         user.from_dict(TestData.VALID_USER, new_user=True)
-        token = user.get_token()
+        token = user.get_api_token()
         db.session.commit()
 
-        self.assertEqual(user, User.check_token(token))
-        user.revoke_token()
-        self.assertEqual(None, User.check_token(token))
+        self.assertEqual(user, User.check_api_token(token))
+        user.revoke_api_token()
+        self.assertEqual(None, User.check_api_token(token))
 
-    def test_email_tokens(self):
+    def test_jwt_tokens(self):
         user = User()
         user.from_dict(TestData.VALID_USER, new_user=True)
         db.session.add(user)
         db.session.commit()
 
-        token = user.get_email_token()
-        self.assertEqual(user, User.check_email_token(token))
+        token = user.get_jwt_token()
+        self.assertEqual(user, User.check_jwt_token(token))
 
-        token = user.get_email_token(expires_in=1)
+        token = user.get_jwt_token(expires_in=1)
         time.sleep(2)
-        self.assertEqual(None, User.check_email_token(token))
+        self.assertEqual(None, User.check_jwt_token(token))
 
 
 if __name__ == '__main__':

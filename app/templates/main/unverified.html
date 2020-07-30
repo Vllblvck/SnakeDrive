@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Page for unverified users</h1>
+<h1> Unverified account </h1>
+<p> You have to confirm your email address before using our service </p>
+<p> Haven't received any email? Click below to resend verification email </p>
+<p>
+  <a href={{ url_for('auth.verify_email_request') }}>Resend verification email</a>
+</p>
 {% endblock %}

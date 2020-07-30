@@ -24,7 +24,7 @@ def send_email(subject, sender, recipients, text_body, html_body):
 
 
 def send_verification_email(user):
-    token = user.get_email_token()
+    token = user.get_jwt_token()
     send_email(
         subject='[SnakeDrive] Confirm your email address',
         sender=current_app.config['APP_MAIL'],
@@ -37,7 +37,7 @@ def send_verification_email(user):
 
 
 def send_password_reset_email(user):
-    token = user.get_email_token(expires_in=900)
+    token = user.get_jwt_token(expires_in=900)
     send_email(
         subject='[SnakeDrive] Reset your password',
         sender=current_app.config['APP_MAIL'],
