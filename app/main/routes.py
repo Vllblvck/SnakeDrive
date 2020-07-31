@@ -7,7 +7,7 @@ from app.main.forms import FileUploadForm
 
 @bp.route('/')
 @login_required
-def index():
+def drive():
     if current_user.verified != True:
         return render_template('main/unverified.html')
     
@@ -15,7 +15,7 @@ def index():
     if form.validate_on_submit():
         pass 
 
-    return render_template('main/index.html')
+    return render_template('main/drive.html')
 
 
 @bp.route('/welcome')

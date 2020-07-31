@@ -53,7 +53,7 @@ class ResetPasswordRequestForm(FlaskForm):
         DataRequired(),
         Email('Invalid email address')
     ])
-    submit = SubmitField('Send')
+    submit = SubmitField('Send email')
 
 
 class ResetPasswordForm(FlaskForm):

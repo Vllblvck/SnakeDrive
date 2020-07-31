@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
   <title>SnakeDrive</title>
@@ -9,24 +9,36 @@
   <meta name="author" content="Mateusz Koamr">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/navigation.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href={{ url_for('static', filename='css/main.css') }}>
 </head>
 
 <body>
   <div id="container">
-    <div class="navbar" id="navbar">
+    <div class="navbar">
       <ul>
         {% if current_user.is_authenticated %}
-        <li><a href={{ url_for('main.index') }}>SnakeDrive</a></li>
-        <li><a href={{ url_for('auth.logout') }}>Log out</a></li>
+        <li><a href={{ url_for('main.drive') }}>SnakeDrive</a></li>
+        <li style="float:right">
+          <a href={{ url_for('auth.logout') }}>
+            <i class="fa fa-sign-out" aria-hidden="true"></i>Log out
+          </a>
+        </li>
         {% else %}
-        <li><a href={{ url_for('main.welcome') }}>SnakeDrive</a></li>
-        <li><a href={{ url_for('auth.register') }}>Sign up</a></li>
-        <li><a href={{ url_for('auth.login') }}>Sign in</a></li>
+        <li><a href={{ url_for('main.drive') }}>SnakeDrive</a></li>
+        <li style="float:right">
+          <a href={{ url_for('auth.login') }}>
+            <i class="fa fa-sign-in" aria-hidden="true"></i> Sign in
+          </a>
+        </li>
+        <li style="float:right">
+          <a href={{ url_for('auth.register') }}>
+            <i class="fa fa-user-plus" aria-hidden="true"></i> Sign up
+          </a>
+        </li>
         {% endif %}
       </ul>
     </div>
-    <hr>
     <div id="content">
       {% with messages = get_flashed_messages() %}
       {% if messages %}
@@ -39,9 +51,10 @@
       {% endwith %}
       {% block content %}{% endblock %}
     </div>
-    <div id="footer">&copy; Copyright 2020</div>
+    <footer>
+      <p>&copy; 2020 - SnakeDrive</p>
+    </footer>
   </div>
-
 </body>
 
 </html>

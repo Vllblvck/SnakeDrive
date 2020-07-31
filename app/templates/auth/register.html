@@ -11,7 +11,7 @@
   {% endif %}
 </p>
 
-<form method="POST">
+<form class="form" method="POST">
   {{ form.hidden_tag() }}
   <p>
     <h1>Sign up</h1>
@@ -19,22 +19,22 @@
 
   <p>
     {{ form.username.label }}<br>
-    {{ form.username(size=32) }}<br>
+    {{ form.username() }}<br>
   </p>
 
   <p>
     {{ form.email.label }}<br>
-    {{ form.email(size=32) }}<br>
+    {{ form.email() }}<br>
   </p>
 
   <p>
     {{ form.password.label }}<br>
-    {{ form.password(size=32) }}<br>
+    {{ form.password() }}<br>
   </p>
 
   <p>
     {{ form.password_repeat.label }}<br>
-    {{ form.password_repeat(size=32) }}<br>
+    {{ form.password_repeat() }}<br>
   </p>
 
   <p>{{ form.submit() }}</p>
