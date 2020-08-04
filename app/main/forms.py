@@ -7,8 +7,8 @@ from app import user_files
 
 
 class FileUploadForm(FlaskForm):
-    files = FileField('Files', validators=[
-        FileRequired(),
+    files = FileField('', validators=[
+        FileRequired('No files to upload'),
         FileAllowed(user_files, 'Cannot upload scripts nor executables')
-    ])
+    ], render_kw={'multiple': True})
     submit = SubmitField('Upload')

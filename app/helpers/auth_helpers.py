@@ -1,18 +1,8 @@
-import pathlib
 import string
 import re
 
 
-def delete_folder(path):
-    for child in path.iterdir():
-        if child.is_dir():
-            delete_folder(child)
-        else:
-            path.unlink()
-    path.rmdir()
-
-
-#Useb by api and web app
+#Used by api and web app
 def valid_username(username):
     if len(username) >= 1 and len(username) <= 32:
         forbidden_chars = string.punctuation

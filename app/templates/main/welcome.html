@@ -2,5 +2,12 @@
 {% set active_page = "index" %}
 
 {% block content %}
-<h1>This will be a welcome page</h1>
+<img src="../static/images/python-logo.png" alt="Python logo">
+<h1>Welcome to SnakeDrive</h1>
+<p>
+SnakeDrive is a free and open source cloud storage service.<br>
+The entire code base can be viewed here: <a href="https://github.com/Vllblvck/SnakeDrive">GitHub page</a><br>
+All your files are safe thanks to encryption. Even we can't see them :)<br>
+Interested? <a href={{ url_for('auth.register') }}>Register now</a>
+</p>
 {% endblock %}

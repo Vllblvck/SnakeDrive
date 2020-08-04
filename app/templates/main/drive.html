@@ -2,5 +2,39 @@
 {% set active_page = "index" %}
 
 {% block content %}
-<h1>This will be user's drive page</h1>
+<p>
+  {% if form.errors %}
+  <ul>
+    {% for field, errors in form.errors.items() %}
+    <li>{{ form[field].label }}: {{ errors }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</p>
+
+<div id="files_upload">
+  <form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <p>
+      <h1> Upload files </h1>
+    </p>
+    <p>
+      {{ form.files() }}<br>
+    </p>
+    <p>
+      {{ form.submit() }}
+    </p>
+  </form>
+</div>
+
+<div id="files_list">
+  <h1> Your files </h1>
+  <ul>
+    {% for file in files %}
+    <li> 
+      {{ file.fullname }}
+    </li>
+    {% endfor %}
+  </ul>
+</div>
 {% endblock %}

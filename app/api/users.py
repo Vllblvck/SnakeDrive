@@ -3,7 +3,8 @@ from flask import jsonify, url_for, request
 from app import db
 from app.email import send_verification_email
 from app.models import User
-from app.helpers import delete_folder, valid_email, valid_username
+from app.helpers.auth_helpers import valid_email, valid_username
+from app.helpers.files_helpers import delete_folder
 from app.api import bp
 from app.api.auth import token_auth
 from app.api.errors import bad_request, error_response

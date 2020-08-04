@@ -24,7 +24,7 @@ def create_app(config_class=Config):
     login_manager.init_app(app)
     mail.init_app(app)
     configure_uploads(app, (user_files))
-    patch_request_class(app, 1 * 1024 * 1024 * 1024)
+    # patch_request_class(app, 1 * 1024 * 1024 * 1024)
 
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)

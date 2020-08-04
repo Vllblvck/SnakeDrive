@@ -13,6 +13,20 @@ footer {
   color: white;
 }
 
+a {
+  color: #5bc0de;
+  text-decoration: none;
+}
+
+a:hover {
+	color: #0275d8;
+}
+
+img {
+  width: 10%;
+  height: auto;
+}
+
 .navbar ul {
   list-style-type: none;
   margin: 0;
@@ -66,15 +80,6 @@ footer {
 
 .form input[type="submit"]:hover {
 	background: #0275d8;
-}
-
-.form a {
-  color: #5bc0de;
-  text-decoration: none;
-}
-
-.form a:hover {
-	color: #0275d8;
 }
 
 .form input[type="checkbox"] {

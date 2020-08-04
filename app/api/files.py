@@ -7,6 +7,7 @@ from app.models import File
 from app.api import bp
 from app.api.auth import token_auth
 from app.api.errors import bad_request, error_response
+from app.helpers.files_helpers import upload_file, edit_file
 
 
 @bp.route('/files', methods=['POST'])
@@ -19,39 +20,21 @@ def upload_files():
     if 'files' not in request.files:
         return bad_request('No files to upload')
 
-    files = request.files.getlist('files')
-    user_dir = user.get_dir()
     uploaded = []
     errors = []
+    files = request.files.getlist('files')
     for file in files:
-        filename = secure_filename(file.filename)
-        if not user_files.file_allowed(file, filename):
-            errors.append(filename + ' has forbidden extension')
+        file_data = upload_file(user, file)
+        if 'error' in file_data:
+            errors.append(file_data['error'])
             continue
-        file_path = user_dir / filename
-        if file_path.exists():
-            filename = user_files.resolve_conflict(user_dir, filename)
-            file_path = user_dir / filename
-        user_files.save(file, folder=str(user.id), name=filename)
-        file_data = {
-            'name': file_path.stem,
-            'extension': file_path.suffix,
-            'fullname': filename,
-            'size': file_path.stat().st_size,
-            'path': str(file_path),
-            'user_id': user.id
-        }
-        db_data = File()
-        db_data.from_dict(file_data)
-        db.session.add(db_data)
+        file_model = File()
+        file_model.from_dict(file_data)
+        db.session.add(file_model)
         db.session.commit()
-        uploaded.append(db_data.to_dict())
+        uploaded.append(file_model.to_dict())
 
-    response_content = {
-        'uploaded_files': uploaded,
-        'errors': errors
-    }
-    response = jsonify(response_content)
+    response = jsonify({'uploaded_files': uploaded, 'errors': errors})
     response.status_code = 201
     return response
 
@@ -99,20 +82,9 @@ def edit_file(filename):
     if not file:
         return error_response(404, 'File {} doest not exist'.format(filename))
 
-    name = secure_filename(data['name'])
-    fullname = name + file.extension
-    path = user.get_dir() / fullname
-    file_data = {
-        'name': name,
-        'fullname': fullname,
-        'path': str(path)
-    }
-
-    old_path = Path(file.path)
-    old_path.rename(path.with_name(fullname))
+    file_data = edit_file(user, file, data['name'])
     file.from_dict(file_data)
     db.session.commit()
-
     response = jsonify(file.to_dict())
     response.status_code = 201
     return response
